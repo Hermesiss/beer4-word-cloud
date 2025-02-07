@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Облако ценностей Пивного Четверга</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-cloud"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: white;
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      h1 {
+        text-align: center;
+      }
+      svg {
+        width: 1200px;
+        height: 800px;
+        background: white;
+      }
+      #counter {
+        color: gray;
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Облако ценностей ПЧ (v0.0.0.21)</h1>
+    <svg id="word-cloud"></svg>
+    <p id="counter">Хмм</p>
+    <script>
+      const values = {
+        "понимание (100%)": 10,
+        "осуждение (0%)": 8,
+        Жигуль: 6,
+        "CUMputer Science": 12,
+        нетворкинг: 5,
+        токсичность: 7,
+        саморазвитие: 9,
+        прокрастинация: 6,
+        Венское: 4,
+        продуктивность: 5,
+        киски: 6,
+        Пшеничное: 7,
+        "js-говно": 8,
+        физкультура: 9,
+        томатка: 10,
+        "каждый может свободно пойти нахуй": 11,
+        Самарское: 12,
+        "вкусная еда": 13,
+        пёсики: 14,
+        раскрепощение: 15,
+        "вокруг шум пусть так не кепишуй всё ништяк": 16,
+        "ХУЙ": 30
+      };
+
+      const words = Object.entries(values).map(([word, size]) => ({
+        text: word,
+        size: size * 5
+      }));
+
+      const layout = d3.layout
+        .cloud()
+        .size([1200, 800])
+        .words(words)
+        .padding(5)
+        .rotate(() => (Math.random() > 0.5 ? 0 : 90))
+        .font("Arial")
+        .fontSize((d) => d.size)
+        .on("end", draw);
+
+      layout.start();
+
+      function draw(words) {
+        d3.select("#word-cloud")
+          .append("g")
+          .attr("transform", "translate(600,400)")
+          .selectAll("text")
+          .data(words)
+          .enter()
+          .append("text")
+          .style("font-size", (d) => d.size + "px")
+          .style("font-family", "Arial")
+          .style(
+            "fill",
+            () => d3.schemeCategory10[Math.floor(Math.random() * 10)]
+          )
+          .attr("text-anchor", "middle")
+          .attr(
+            "transform",
+            (d) => `translate(${d.x},${d.y}) rotate(${d.rotate})`
+          )
+          .text((d) => d.text);
+      }
+
+      fetch('counter.php')
+        .then(response => response.text())
+        .then(count => {
+          document.getElementById('counter').textContent = `ты ${count}-ый такой любопытный`;
+        });
+    </script>
+  </body>
+</html>

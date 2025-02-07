@@ -26,19 +26,33 @@
         height: 70vh;
         background: white;
       }
+      #counter {
+        color: gray;
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+      }
     </style>
   </head>
   <body>
-    <h1>Облако ценностей ПЧ (v0.0.1.32)</h1>
+    <h1>Облако ценностей ПЧ (v2025-01-31)</h1>
     <svg id="word-cloud"></svg>
+    <p id="counter">Хмм</p>
     <script>
+      fetch("counter.php")
+        .then((response) => response.text())
+        .then((count) => {
+          document.getElementById(
+            "counter"
+          ).textContent = `ты ${count}-ый такой любопытный`;
+        });
       fetch("./top_50_words.json")
         .then((response) => response.json())
         .then((values) => {
           let max = Object.entries(values)[0][1];
           const words = Object.entries(values).map(([word, size]) => ({
             text: word,
-            size: size * 100 / max,
+            size: (size * 100) / max
           }));
 
           console.log(words);
@@ -58,7 +72,12 @@
           function draw(words) {
             d3.select("#word-cloud")
               .append("g")
-              .attr("transform", `translate(${window.innerWidth * 0.45},${window.innerHeight * 0.35})`)
+              .attr(
+                "transform",
+                `translate(${window.innerWidth * 0.45},${
+                  window.innerHeight * 0.35
+                })`
+              )
               .selectAll("text")
               .data(words)
               .enter()
@@ -67,13 +86,18 @@
               .style("font-family", "Arial")
               .style("fill", (d, i) => d3.schemeCategory10[i % 10])
               .attr("text-anchor", "middle")
-              .attr("transform", (d) => `translate(${[d.x, d.y]})rotate(${d.rotate})`)
+              .attr(
+                "transform",
+                (d) => `translate(${[d.x, d.y]})rotate(${d.rotate})`
+              )
               .text((d) => d.text);
           }
 
           window.addEventListener("resize", () => {
             d3.select("#word-cloud").selectAll("*").remove();
-            layout.size([window.innerWidth * 0.9, window.innerHeight * 0.7]).start();
+            layout
+              .size([window.innerWidth * 0.9, window.innerHeight * 0.7])
+              .start();
           });
         })
         .catch((error) => console.error("Error fetching the JSON:", error));
